@@ -3,76 +3,72 @@
 	const dBody = document.body;
 
 	if (dBody) {
-
 		const preloader = dBody.querySelector('.preloader'),
 			preloaderImgs = preloader.querySelectorAll('.preloader__imgs img'),
 			progressBar = preloader.querySelector('.preloader__line-progress'),
 			url = document.location.href,
 			images = document.querySelectorAll('img:not(.preloader__imgs img)'),
-			max = 100,
-			xhr = new XMLHttpRequest();
-
-			console.log(images);
+			finalImg = preloader.querySelector('.preloader__imgs img.finish'),
+			cacheCleared = localStorage.getItem('cacheCleared') === null;
 
 		let loadingProgress = 0,
 			start = 0,
 			duration = 80;
 
-		function animateBar(progress) {
+		function animateLoad(progress) {
+			// Функция для анимации прогресс-бара
 			let interval = setInterval(() => {
-				if (start < progress && start < max) {
+				if (start < progress && start < 100) {
 					start++;
-
-					if (start == max) {
+					if (start === 100) {
 						clearInterval(interval);
-						setTimeout(function () {
+						setTimeout(() => {
 							preloader.style.cssText = "opacity: 0; visibility: hidden;";
+							localStorage.setItem('cacheCleared', 'false');
 						}, 1);
 					}
-
-					let tr = -100 + start;
-
-					progressBar.style.cssText = `transform:translateX(${tr}%)`;
+					let translateValue = -100 + start;
+					progressBar.style.cssText = `transform: translateX(${translateValue}%);`;
 				}
 			}, 1);
 
 			let now = -1;
+			// Функция для изменения изображения в прелоадере
 			function changeImage() {
-				// Убираем все картинки
-				for (let i = 0; i < preloaderImgs.length; i++) {
-					preloaderImgs[i].style.display = 'none';
-				}
-				// Показываем поочередно
-				if ((now + 1) == preloaderImgs.length) {
-					now = 0;
-				} else {
-					now++;
-				}
+				preloaderImgs.forEach(img => img.style.display = 'none');
+				now = (now + 1) % preloaderImgs.length;
 				preloaderImgs[now].style.display = 'block';
 			}
-			// Повторяем каждые duration
-			setInterval(function () {
-				changeImage()
-			}, duration);
+			setInterval(changeImage, duration);
 		}
 
+		// Добавление слушателей событий для XHR
 		function addListeners(xhr) {
-			xhr.addEventListener('loadend', handleEventLoadend);
-			xhr.addEventListener('progress', handleEvent);
+			xhr.addEventListener('loadend', () => animateLoad(100));
+			xhr.addEventListener('progress', (e) => {
+				loadingProgress = loadingProgress + (100 - loadingProgress) / (images.length + 1);
+				animateLoad(loadingProgress);
+			});
 		}
-		function handleEvent(e) {
-			loadingProgress = loadingProgress + (100 - loadingProgress) / (images.length + 1);
-			animateBar(loadingProgress)
-		}
-		function handleEventLoadend(e) {
-			animateBar(max)
-		}
+
+		// Выполнение XHR запроса
 		function runXHR(url) {
+			const xhr = new XMLHttpRequest();
 			addListeners(xhr);
 			xhr.open("GET", url);
-			xhr.send(document);
-			return xhr;
+			xhr.send();
 		}
-		runXHR(url);
+
+		if (cacheCleared) {
+			// При первом заходе или очищенном кеше показываем все изображения прелоадера
+			runXHR(url);
+		} else {
+			// При обновлении страницы показываем только финальное лого и привязываем его к загрузке DOM
+			preloaderImgs.forEach(img => img.style.display = 'none');
+			finalImg.style.display = 'block';
+			window.addEventListener('load', () => {
+				preloader.style.cssText = "opacity: 0; visibility: hidden;";
+			});
+		}
 	}
 })();
