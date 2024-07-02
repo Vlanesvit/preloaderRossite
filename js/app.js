@@ -6,19 +6,16 @@
 		const preloader = dBody.querySelector('.preloader'),
 			preloaderImgs = preloader.querySelectorAll('.preloader__imgs img'),
 			progressBar = preloader.querySelector('.preloader__line-progress'),
-			url = document.location.href,
-			images = document.querySelectorAll('img:not(.preloader__imgs img)'),
-			finalImg = preloader.querySelector('.preloader__imgs img.finish'),
+			finalImg = preloader.querySelector('img[src*="finish"]'),
 			cacheCleared = localStorage.getItem('cacheCleared') === null;
 
-		let loadingProgress = 0,
-			start = 0,
+		let start = 0,
 			duration = 80;
 
-		function animateLoad(progress) {
-			// Функция для анимации прогресс-бара
+		// Функция для анимации прогресс-бара
+		function animateBar() {
 			let interval = setInterval(() => {
-				if (start < progress && start < 100) {
+				if (start < 100) {
 					start++;
 					if (start === 100) {
 						clearInterval(interval);
@@ -30,7 +27,7 @@
 					let translateValue = -100 + start;
 					progressBar.style.cssText = `transform: translateX(${translateValue}%);`;
 				}
-			}, 1);
+			}, 100); // Обновляем каждую сотую долю секунды для 10 секундного прелоадера
 
 			let now = -1;
 			// Функция для изменения изображения в прелоадере
@@ -39,29 +36,13 @@
 				now = (now + 1) % preloaderImgs.length;
 				preloaderImgs[now].style.display = 'block';
 			}
+
 			setInterval(changeImage, duration);
-		}
-
-		// Добавление слушателей событий для XHR
-		function addListeners(xhr) {
-			xhr.addEventListener('loadend', () => animateLoad(100));
-			xhr.addEventListener('progress', (e) => {
-				loadingProgress = loadingProgress + (100 - loadingProgress) / (images.length + 1);
-				animateLoad(loadingProgress);
-			});
-		}
-
-		// Выполнение XHR запроса
-		function runXHR(url) {
-			const xhr = new XMLHttpRequest();
-			addListeners(xhr);
-			xhr.open("GET", url);
-			xhr.send();
 		}
 
 		if (cacheCleared) {
 			// При первом заходе или очищенном кеше показываем все изображения прелоадера
-			runXHR(url);
+			animateBar();
 		} else {
 			// При обновлении страницы показываем только финальное лого и привязываем его к загрузке DOM
 			preloaderImgs.forEach(img => img.style.display = 'none');
