@@ -31,7 +31,7 @@
 
 	function completePreloading() {
 		preloadProgressLine.style.width = '100%';
-		preloadProgressLine.style.transitionDuration = `8s`;
+		preloadProgressLine.style.transitionDuration = (preloadDuration - 2000) + 'ms';
 		preloadProgressLine.addEventListener('transitionend', function () {
 			preloadProgress.classList.add('_ended')
 		});
