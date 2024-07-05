@@ -6,7 +6,7 @@
 		preloadProgress = preloader.querySelector('.preloader__line'),
 		preloadProgressLine = preloadProgress.querySelector('.preloader__line-progress'),
 		finishImg = document.querySelector('.preloader__imgs img[src*="finish"]'),
-		cacheCleared = localStorage.getItem('cacheCleared') === null;
+		cacheCleared = sessionStorage.getItem('cacheCleared') === null;
 
 	let start = 0,
 		preloadDuration = 10000,
@@ -31,7 +31,7 @@
 
 	function completePreloading() {
 		preloadProgressLine.style.width = '100%';
-		preloadProgressLine.style.transitionDuration = '8s';
+		preloadProgressLine.style.transitionDuration = `${preloadDuration} - 2000`;
 		preloadProgressLine.addEventListener('transitionend', function () {
 			preloadProgress.classList.add('_ended')
 		});
@@ -43,7 +43,7 @@
 		completePreloading();
 		setTimeout(() => {
 			hidePreload();
-			localStorage.setItem('cacheCleared', 'false');
+			sessionStorage.setItem('cacheCleared', 'false');
 		}, preloadDuration);
 	} else {
 		// При обновлении страницы показываем только финальное лого и привязываем его к загрузке DOM
