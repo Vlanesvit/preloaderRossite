@@ -48,6 +48,7 @@
   -o-object-fit: cover;
      object-fit: cover;
   display: none;
+  pointer-events: none;
 }
 .preloader__line {
   position: absolute;
@@ -64,9 +65,8 @@
   transition: top 0.5s cubic-bezier(0.11, 0, 0.5, 0) 0s, max-width 0.5s cubic-bezier(0.11, 0, 0.5, 0) 0.5s, height 0.3s cubic-bezier(0.11, 0, 0.5, 0) 1s;
 }
 .preloader__line._ended {
-  top: 50%;
   max-width: 100%;
-  height: 100vh;
+  height: calc(100vh + 65%);
 }
 .preloader__line-progress {
   position: absolute;
